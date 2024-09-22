@@ -4,6 +4,9 @@
  */
 package Interfaz;
 
+import AnalizadorCSS.IdentificadorCSS;
+import AnalizadorHTML.IdentificadorHTML;
+import AnalizadorHTML.TraductorEtiquetas;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Panel;
@@ -15,6 +18,9 @@ import javax.swing.JTextArea;
  * @author alejandro
  */
 public class JFrameInicio extends javax.swing.JFrame {
+    
+    private IdentificadorHTML ihtml = new IdentificadorHTML();
+    private IdentificadorCSS icss = new IdentificadorCSS();
 
     /**
      * Creates new form JFrameInicio
@@ -58,6 +64,11 @@ public class JFrameInicio extends javax.swing.JFrame {
         jButtonReportes.setText("Reportes");
 
         jButtonAnalizar.setText("Analizar");
+        jButtonAnalizar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAnalizarActionPerformed(evt);
+            }
+        });
 
         jTextAreaAnalizador.setColumns(20);
         jTextAreaAnalizador.setRows(5);
@@ -107,6 +118,17 @@ public class JFrameInicio extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButtonAnalizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAnalizarActionPerformed
+        
+        String texto = jTextAreaAnalizador.getText();
+        
+        ihtml.anlizarHTML(texto);
+        icss.analizarCSS(texto);
+        
+        
+        
+    }//GEN-LAST:event_jButtonAnalizarActionPerformed
 
     /**
      * @param args the command line arguments

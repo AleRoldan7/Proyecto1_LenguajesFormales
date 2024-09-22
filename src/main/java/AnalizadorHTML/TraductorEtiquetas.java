@@ -10,13 +10,13 @@ import java.util.ArrayList;
  *
  * @author alejandro
  */
-public class traductorEtiquetas {
+public class TraductorEtiquetas {
     
     private ArrayList<String> etiquetaHTML = new ArrayList<>();
     private ArrayList<String> etiqueta = new ArrayList<>();
     
     
-    private ArrayList<String> etiquetasNormales(){
+    public ArrayList<String> etiquetasNormales(){
         
         etiqueta.add("<principal>");
         etiqueta.add("<principal/>");
@@ -59,7 +59,7 @@ public class traductorEtiquetas {
     }
     
     
-    private ArrayList<String> etiquetaTraducida(){
+    public ArrayList<String> etiquetaTraducida(){
         
         etiquetaHTML.add("<main>");
         etiquetaHTML.add("<main/>");

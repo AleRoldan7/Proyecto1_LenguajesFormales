@@ -1,6 +1,9 @@
+Interfaz/VentanaTraduccion.class
+Interfaz/JFrameInicio$2.class
+Interfaz/JFrameInicio.class
+AnalizadorHTML/TraductorEtiquetas.class
 Interfaz/JFrameInicio$1.class
+AnalizadorCSS/IdentificadorCSS.class
 Inicio/Proyecto1AnalizadorLexico.class
-AnalizadorHTML/traductorEtiquetas.class
 AnalizadorHTML/IdentificadorHTML.class
 Reportes/Reporte.class
-Interfaz/JFrameInicio.class
