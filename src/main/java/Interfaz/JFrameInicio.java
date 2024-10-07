@@ -5,11 +5,21 @@
 package Interfaz;
 
 import AnalizadorCSS.IdentificadorCSS;
+import AnalizadorGeneral.AnalizarGeneral;
 import AnalizadorHTML.IdentificadorHTML;
 import AnalizadorHTML.TraductorEtiquetas;
+import AnalizadorJS.IdentificadorJS;
+import Reportes.Reporte;
+import Reportes.ResultadoAnalisis;
+import Reportes.Token;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Panel;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JEditorPane;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
@@ -19,9 +29,8 @@ import javax.swing.JTextArea;
  */
 public class JFrameInicio extends javax.swing.JFrame {
     
-    private IdentificadorHTML ihtml = new IdentificadorHTML();
-    private IdentificadorCSS icss = new IdentificadorCSS();
-
+    private AnalizarGeneral ag = new AnalizarGeneral();
+    private IdentificadorHTML idHTML = new IdentificadorHTML();
     /**
      * Creates new form JFrameInicio
      */
@@ -62,6 +71,11 @@ public class JFrameInicio extends javax.swing.JFrame {
         jButtonCargarArchivo.setText("Cargar Archivo");
 
         jButtonReportes.setText("Reportes");
+        jButtonReportes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonReportesActionPerformed(evt);
+            }
+        });
 
         jButtonAnalizar.setText("Analizar");
         jButtonAnalizar.addActionListener(new java.awt.event.ActionListener() {
@@ -121,15 +135,76 @@ public class JFrameInicio extends javax.swing.JFrame {
 
     private void jButtonAnalizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAnalizarActionPerformed
         
+        /*
+        // Obtener el texto ingresado en el JTextArea
         String texto = jTextAreaAnalizador.getText();
+
+        // Ejecutar el análisis con la clase AnalizarGeneral
+        //List<Token> htmlGenerado = ag.analizarTexto(texto);
+
+        // Mostrar el HTML generado en un JEditorPane dentro de un nuevo JFrame
+        JFrame ventanaHTML = new JFrame("Resultado del Análisis");
+        JEditorPane editorHTML = new JEditorPane("text/html", null);
+        editorHTML.setEditable(false);
+
+        JScrollPane scrollPane = new JScrollPane(editorHTML);
+        ventanaHTML.getContentPane().add(scrollPane, BorderLayout.CENTER);
+        ventanaHTML.setSize(new Dimension(800, 600));
+        ventanaHTML.setVisible(true);
+        */
         
-        ihtml.anlizarHTML(texto);
-        icss.analizarCSS(texto);
-        
-        
-        
+        // Obtener el texto ingresado en el JTextArea
+        String texto = jTextAreaAnalizador.getText();
+
+        // Crear una instancia de la clase AnalizarGeneral
+        AnalizarGeneral ag = new AnalizarGeneral();
+
+        // Ejecutar el análisis del texto
+        ResultadoAnalisis resultado = ag.analizarTexto(texto);
+
+        // Mostrar los resultados del análisis (tokens encontrados)
+        if (!resultado.getTokens().isEmpty()) {
+            ag.mostrarResultados(resultado.getTokens());
+        } else {
+            // Si no se encontraron tokens, mostrar un mensaje
+            JFrame ventanaVacia = new JFrame("Sin Resultados");
+            JOptionPane.showMessageDialog(ventanaVacia, "No se encontraron tokens en el análisis.", "Resultados", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+
     }//GEN-LAST:event_jButtonAnalizarActionPerformed
 
+    private void jButtonReportesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonReportesActionPerformed
+     
+        // Obtener el texto del área de texto
+        String texto = jTextAreaAnalizador.getText().trim(); // .trim() para eliminar espacios en blanco
+
+        if (texto.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor, ingrese texto para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Crear una instancia de IdentificadorHTML o el analizador que necesites
+        IdentificadorHTML identificadorHTML = new IdentificadorHTML();
+        IdentificadorCSS identificadorCSS = new IdentificadorCSS();
+        IdentificadorJS identificadorJS = new IdentificadorJS();
+        
+        // Analizar el texto y obtener los tokens
+        List<Token> tokensHTML = identificadorHTML.obtenerTokensValidos(texto); // Asegúrate de que este método retorne una lista de tokens
+        List<Token> tokensCSS = identificadorCSS.obtenerTokensValidos(texto, 1); // Asegúrate de que este método retorne una lista de tokens
+        List<Token> tokensJS = identificadorJS.obtenerTokensValidos(texto, 1); // Asegúrate de que este método retorne una lista de tokens
+
+        // Crear una instancia de Reporte y mostrar el reporte
+        Reporte reporte = new Reporte();
+
+        reporte.mostrarReporte(tokensHTML, tokensCSS, tokensJS);
+        
+      
+       
+    }//GEN-LAST:event_jButtonReportesActionPerformed
+
+    
+   
     /**
      * @param args the command line arguments
      */

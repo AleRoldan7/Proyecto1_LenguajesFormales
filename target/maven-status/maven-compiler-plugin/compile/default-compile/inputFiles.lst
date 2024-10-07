@@ -1,7 +1,13 @@
+/home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/Reportes/Token.java
+/home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/AnalizadorGeneral/AnalizarGeneral.java
+/home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/Reportes/Reporte.java
+/home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/AnalizadorHTML/IdentificadorHTML.java
+/home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/CreadorHTML/GeneradorHTML.java
+/home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/AnalizadorJS/IdentificadorJS.java
+/home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/Interfaz/VentanaAnalisis.java
 /home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/Interfaz/JFrameInicio.java
 /home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/AnalizadorCSS/IdentificadorCSS.java
 /home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/Interfaz/VentanaTraduccion.java
-/home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/Reportes/Reporte.java
-/home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/AnalizadorHTML/IdentificadorHTML.java
+/home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/Reportes/ResultadoAnalisis.java
 /home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/Inicio/Proyecto1AnalizadorLexico.java
 /home/alejandro/NetBeansProjects/Proyecto1AnalizadorLexico/src/main/java/AnalizadorHTML/TraductorEtiquetas.java

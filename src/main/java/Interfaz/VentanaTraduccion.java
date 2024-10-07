@@ -4,6 +4,10 @@
  */
 package Interfaz;
 
+import Reportes.Token;
+import java.awt.BorderLayout;
+import java.util.List;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -14,19 +18,38 @@ import javax.swing.JTextArea;
  */
 public class VentanaTraduccion extends JFrame{
     
-    public VentanaTraduccion(String textoTraducido) {
-        setTitle("Traducción");
-        setSize(400, 300);
+    private JTextArea textArea;
+
+    public VentanaTraduccion(List<Token> tokensEncontrados, String lenguaje) {
+        setTitle("Resultados de Análisis - " + lenguaje);
+        setSize(600, 400);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         
-        JTextArea textArea = new JTextArea();
-        textArea.setText(textoTraducido);
-        textArea.setEditable(false);
+        textArea = new JTextArea();
+        textArea.setEditable(false); // No permitir la edición del texto
+        JScrollPane scrollPane = new JScrollPane(textArea); // Permitir scroll
         
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        add(scrollPane);
+        // Mostrar los tokens encontrados
+        mostrarTokens(tokensEncontrados, lenguaje);
         
-        setLocationRelativeTo(null); // Centrar la ventana
-        setVisible(true);
+        add(scrollPane, BorderLayout.CENTER);
     }
+    
+    private void mostrarTokens(List<Token> tokensEncontrados, String lenguaje) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Lenguaje: ").append(lenguaje).append("\n\n");
+        
+        for (Token token : tokensEncontrados) {
+            builder.append("Token: ").append(token.getLexema())
+                   .append(", Tipo: ").append(token.getTipo())
+                   .append(", Fila: ").append(token.getFila())
+                   .append(", Columna: ").append(token.getColumna())
+                   .append("\n");
+        }
+        
+        textArea.setText(builder.toString());
+    }
+
+
 }

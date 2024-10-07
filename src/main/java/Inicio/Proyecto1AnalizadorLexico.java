@@ -6,6 +6,7 @@ package Inicio;
 
 import AnalizadorHTML.TraductorEtiquetas;
 import Interfaz.JFrameInicio;
+import Interfaz.VentanaAnalisis;
 import java.util.Scanner;
 
 /**
@@ -16,14 +17,18 @@ public class Proyecto1AnalizadorLexico {
 
     public static void main(String[] args) {
         
+        VentanaAnalisis vn = new VentanaAnalisis();
+        vn.setVisible(true);
+        vn.setLocationRelativeTo(null);
         
+        /*
         JFrameInicio jf = new JFrameInicio();
         jf.setSize(760, 687);
         jf.setVisible(true);
         jf.setLocationRelativeTo(null);
         jf.setDefaultCloseOperation(JFrameInicio.EXIT_ON_CLOSE);    
-        
-        
+        */
+        /*
         Scanner scanner = new Scanner(System.in);
         String a;
         TraductorEtiquetas te = new TraductorEtiquetas();
@@ -31,5 +36,6 @@ public class Proyecto1AnalizadorLexico {
         a = scanner.nextLine();
         
         System.out.println("Traducida: "+te.traducirEtiqueta(a));
+        */
     }
 }
