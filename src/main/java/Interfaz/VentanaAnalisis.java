@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Interfaz;
 
 import AnalizadorCSS.IdentificadorCSS;
@@ -30,16 +26,21 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 /**
- *
- * @author alejandro
+ * Clase que representa la ventana de análisis de código.
+ * Permite cargar texto, analizarlo y generar reportes y HTML.
+ * 
+ * @author Alejandro
  */
-public class VentanaAnalisis extends JFrame implements ActionListener{
+public class VentanaAnalisis extends JFrame implements ActionListener {
     
-      private JTextArea areaTexto;
+    private JTextArea areaTexto;
     private JButton botonAnalizar;
     private JButton botonCargarArchivo;
     private JButton botonVerReporte;
-    private JButton botonGenerarHTML;  // Nuevo botón para generar el HTML
+    private JButton botonGenerarHTML;  
+    private IdentificadorHTML identificadorHTML = new IdentificadorHTML();
+    private IdentificadorCSS identificadorCSS = new IdentificadorCSS();
+    private IdentificadorJS identificadorJS = new IdentificadorJS();
 
     public VentanaAnalisis() {
         // Configurar la ventana principal
@@ -58,13 +59,13 @@ public class VentanaAnalisis extends JFrame implements ActionListener{
         botonAnalizar = new JButton("Analizar Código");
         botonCargarArchivo = new JButton("Cargar Archivo");
         botonVerReporte = new JButton("Ver Reportes");
-        botonGenerarHTML = new JButton("Generar HTML"); // Botón para generar HTML
+        botonGenerarHTML = new JButton("Generar HTML"); 
 
         // Agregar los listeners a los botones
         botonAnalizar.addActionListener(this);
         botonCargarArchivo.addActionListener(this);
         botonVerReporte.addActionListener(this);
-        botonGenerarHTML.addActionListener(this);  // Listener para generar HTML
+        botonGenerarHTML.addActionListener(this);  
 
         // Crear un panel para los botones
         JPanel panelBotones = new JPanel();
@@ -72,7 +73,7 @@ public class VentanaAnalisis extends JFrame implements ActionListener{
         panelBotones.add(botonAnalizar);
         panelBotones.add(botonCargarArchivo);
         panelBotones.add(botonVerReporte);
-        panelBotones.add(botonGenerarHTML);  // Añadir botón al panel
+        panelBotones.add(botonGenerarHTML);  
 
         // Agregar el área de texto y los botones al JFrame
         add(scrollPane, BorderLayout.CENTER);
@@ -92,7 +93,6 @@ public class VentanaAnalisis extends JFrame implements ActionListener{
         }
     }
 
-    // Método para analizar el código ingresado en el área de texto
     private void analizarCodigo() {
         // Obtener el texto ingresado en el JTextArea
         String texto = areaTexto.getText();
@@ -100,17 +100,8 @@ public class VentanaAnalisis extends JFrame implements ActionListener{
         // Crear una instancia de la clase AnalizarGeneral
         AnalizarGeneral ag = new AnalizarGeneral();
 
-        // Ejecutar el análisis del texto
-        ResultadoAnalisis resultado = ag.analizarTexto(texto);
-
-        // Mostrar los resultados del análisis (tokens encontrados)
-        if (!resultado.getTokens().isEmpty()) {
-            ag.mostrarResultados(resultado.getTokens());
-        } else {
-            // Si no se encontraron tokens, mostrar un mensaje
-            JFrame ventanaVacia = new JFrame("Sin Resultados");
-            JOptionPane.showMessageDialog(ventanaVacia, "No se encontraron tokens en el análisis.", "Resultados", JOptionPane.INFORMATION_MESSAGE);
-        }
+        // Mostrar los resultados del análisis
+        ag.mostrarResultados(texto);
     }
 
     // Método para cargar un archivo de texto y mostrar su contenido en el área de texto
@@ -136,10 +127,6 @@ public class VentanaAnalisis extends JFrame implements ActionListener{
             return;
         }
 
-        IdentificadorHTML identificadorHTML = new IdentificadorHTML();
-        IdentificadorCSS identificadorCSS = new IdentificadorCSS();
-        IdentificadorJS identificadorJS = new IdentificadorJS();
-
         List<Token> tokensHTML = identificadorHTML.obtenerTokensValidos(texto);
         List<Token> tokensCSS = identificadorCSS.obtenerTokensValidos(texto, 1);
         List<Token> tokensJS = identificadorJS.obtenerTokensValidos(texto, 1);
@@ -148,7 +135,7 @@ public class VentanaAnalisis extends JFrame implements ActionListener{
         reporte.mostrarReporte(tokensHTML, tokensCSS, tokensJS);
     }
 
-    // Nuevo método para generar el HTML si el análisis es correcto
+    // Método para generar el HTML si el análisis es correcto
     private void generarHTML() {
         String texto = areaTexto.getText().trim();
 
@@ -156,11 +143,6 @@ public class VentanaAnalisis extends JFrame implements ActionListener{
             JOptionPane.showMessageDialog(this, "Por favor, ingrese texto para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        // Crear instancias de los analizadores
-        IdentificadorHTML identificadorHTML = new IdentificadorHTML();
-        IdentificadorCSS identificadorCSS = new IdentificadorCSS();
-        IdentificadorJS identificadorJS = new IdentificadorJS();
 
         // Obtener los tokens
         List<Token> tokensHTML = identificadorHTML.obtenerTokensValidos(texto);
@@ -170,7 +152,7 @@ public class VentanaAnalisis extends JFrame implements ActionListener{
         // Si no hay errores, generar el archivo HTML
         if (!tokensHTML.isEmpty() || !tokensCSS.isEmpty() || !tokensJS.isEmpty()) {
             GeneradorHTML generador = new GeneradorHTML();
-            generador.generarHTML(tokensHTML, tokensCSS, tokensJS);
+            generador.generarHTML(tokensHTML);
             JOptionPane.showMessageDialog(this, "HTML generado exitosamente.", "Resultado", JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(this, "No se puede generar HTML, ya que no se encontraron tokens válidos.", "Error", JOptionPane.ERROR_MESSAGE);

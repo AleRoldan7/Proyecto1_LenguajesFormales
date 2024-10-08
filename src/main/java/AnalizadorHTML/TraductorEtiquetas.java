@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package AnalizadorHTML;
 
 import java.util.ArrayList;
@@ -11,13 +7,13 @@ import java.util.ArrayList;
  * @author alejandro
  */
 public class TraductorEtiquetas {
-    
+
     private ArrayList<String> etiquetaHTML = new ArrayList<>();
     private ArrayList<String> etiqueta = new ArrayList<>();
-    
-    
-    public ArrayList<String> etiquetasNormales(){
-        
+
+    // Método para inicializar etiquetas normales
+    public ArrayList<String> etiquetasNormales() {
+
         etiqueta.add("<principal>");
         etiqueta.add("<principal/>");
         etiqueta.add("<encabezado>");
@@ -53,14 +49,14 @@ public class TraductorEtiquetas {
         etiqueta.add("<boton>");
         etiqueta.add("<boton/>");
         etiqueta.add("<piepagina>");
-        etiqueta.add("<piepagina/>");   
-        
+        etiqueta.add("<piepagina/>");
+
         return etiqueta;
     }
-    
-    
-    public ArrayList<String> etiquetaTraducida(){
-        
+
+    // Método para inicializar etiquetas HTML traducidas
+    public ArrayList<String> etiquetaTraducida() {
+
         etiquetaHTML.add("<main>");
         etiquetaHTML.add("</main>");
         etiquetaHTML.add("<header>");
@@ -96,25 +92,54 @@ public class TraductorEtiquetas {
         etiquetaHTML.add("<button>");
         etiquetaHTML.add("</button>");
         etiquetaHTML.add("<footer>");
-        etiquetaHTML.add("</footer>");   
-        
+        etiquetaHTML.add("</footer>");
+
         return etiquetaHTML;
     }
-    
+
+    // Método para traducir etiquetas
     public String traducirEtiqueta(String etiquetaUsuario) {
 
+        // Cargar etiquetas normales y traducidas
         etiquetasNormales();
         etiquetaTraducida();
-        
+
+        // Verificar si es una etiqueta de título (titulo#)
+        if (etiquetaUsuario.startsWith("<titulo") && etiquetaUsuario.endsWith(">")) {
+            String numero = etiquetaUsuario.substring(7, etiquetaUsuario.length() - 1); // Extraer el número entre <titulo#>
+            try {
+                int nivel = Integer.parseInt(numero);
+                if (nivel >= 1 && nivel <= 6) {
+                    return "<h" + nivel + ">";
+                } else {
+                    return "Número de título fuera de rango. Solo se permite de h1 a h6.";
+                }
+            } catch (NumberFormatException e) {
+                return "Formato de título incorrecto. Debe ser <titulo#>, donde # es un número.";
+            }
+        }
+
+        // Verificar si es una etiqueta de cierre de título
+        if (etiquetaUsuario.startsWith("</titulo") && etiquetaUsuario.endsWith(">")) {
+            String numero = etiquetaUsuario.substring(8, etiquetaUsuario.length() - 1); // Extraer el número entre </titulo#>
+            try {
+                int nivel = Integer.parseInt(numero);
+                if (nivel >= 1 && nivel <= 6) {
+                    return "</h" + nivel + ">";
+                } else {
+                    return "Número de título fuera de rango. Solo se permite de h1 a h6.";
+                }
+            } catch (NumberFormatException e) {
+                return "Formato de título incorrecto. Debe ser </titulo#>, donde # es un número.";
+            }
+        }
+
+        // Si no es una etiqueta de título, buscar en las etiquetas normales
         int lista = etiqueta.indexOf(etiquetaUsuario);
-        
         if (lista != -1) {
             return etiquetaHTML.get(lista);
         } else {
             return "Etiqueta no encontrada";
         }
     }
-   
-    
-    
 }

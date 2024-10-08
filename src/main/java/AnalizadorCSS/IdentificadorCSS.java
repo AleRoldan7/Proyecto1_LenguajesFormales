@@ -76,29 +76,32 @@ public class IdentificadorCSS {
     }
  
     private String analizarEtiquetasCss(String entrada) {
-        
         StringBuilder resultado = new StringBuilder();
-        
-        for (String etiqueta : tokenEtiqueta) {
-            if (entrada.contains(etiqueta)) {
-                resultado.append("Etiqueta CSS detectada: " + etiqueta + "\n");
+
+        // Uso de una sola iteración para verificar etiquetas, reglas y otros tokens
+        for (String token : tokenEtiqueta) {
+            if (entrada.contains(token)) {
+                resultado.append("Etiqueta CSS detectada: ").append(token).append("\n");
             }
         }
+
         for (String regla : tokenReglas) {
             if (entrada.contains(regla)) {
-                resultado.append("Regla CSS detectada: " + regla + "\n");
+                resultado.append("Regla CSS detectada: ").append(regla).append("\n");
             }
         }
+
         for (String otro : tokenOtros) {
             if (entrada.contains(otro)) {
-                resultado.append("Otro token CSS detectado: " + otro + "\n");
+                resultado.append("Otro token CSS detectado: ").append(otro).append("\n");
             }
         }
-        
+
         return resultado.toString();
     }
+
      
-    public List<Token> obtenerTokensValidos(String linea, int numeroDeLinea) {
+   public List<Token> obtenerTokensValidos(String linea, int numeroDeLinea) {
         List<Token> tokens = new ArrayList<>();
         StringBuilder tokenActual = new StringBuilder();
         int columnaActual = 1;
@@ -106,16 +109,19 @@ public class IdentificadorCSS {
         for (char c : linea.toCharArray()) {
             // Verificar delimitadores
             if (c == ' ' || c == '{' || c == '}' || c == ';') {
-                // Si hay un token acumulado, lo agregamos como token válido
+                // Si hay un token acumulado, lo agregamos como token válido si está en la lista de métodos válidos
                 if (tokenActual.length() > 0) {
-                    tokens.add(new Token(
-                        tokenActual.toString(),        // Lexema del token
-                        "Desconocido",                 // Expresión regular (puedes ajustar según lo que corresponda)
-                        "Lenguaje",                    // Lenguaje (puedes cambiar según sea necesario)
-                        "TipoDesconocido",             // Tipo (puedes ajustarlo según corresponda)
-                        numeroDeLinea,                 // Fila o línea en la que se encuentra el token
-                        columnaActual - tokenActual.length() // Columna inicial del token
-                    ));
+                    String lexema = tokenActual.toString();
+                    if (tokenActual.length() > 0) {  // Verificar si el token es un método válido
+                        tokens.add(new Token(
+                            lexema,                        // Lexema del token
+                            "Método CSS",                  // Expresión regular (ajustable)
+                            "Css",                         // Lenguaje
+                            "Método",                      // Tipo (en este caso, sería un método)
+                            numeroDeLinea,                 // Fila o línea en la que se encuentra el token
+                            columnaActual - tokenActual.length() // Columna inicial del token
+                        ));
+                    }
                     tokenActual.setLength(0); // Reiniciamos el acumulador del token
                 }
 
@@ -124,7 +130,7 @@ public class IdentificadorCSS {
                     tokens.add(new Token(
                         String.valueOf(c),            // Lexema del delimitador
                         "Delimitador",                // Expresión regular para delimitadores
-                        "Lenguaje",                   // Lenguaje (puedes cambiar según sea necesario)
+                        "Css",                        // Lenguaje
                         "Delimitador",                // Tipo (en este caso, sería un delimitador)
                         numeroDeLinea,                // Fila o línea en la que se encuentra el token
                         columnaActual                 // Columna donde se encuentra el delimitador
@@ -138,16 +144,19 @@ public class IdentificadorCSS {
             columnaActual++; // Avanzamos a la siguiente columna
         }
 
-        // Si al final hay un token acumulado, lo agregamos también
+        // Si al final hay un token acumulado, lo agregamos también si es válido
         if (tokenActual.length() > 0) {
-            tokens.add(new Token(
-                tokenActual.toString(),            // Lexema del token
-                "Desconocido",                     // Expresión regular (ajustable)
-                "Lenguaje",                        // Lenguaje
-                "TipoDesconocido",                 // Tipo (ajustable)
-                numeroDeLinea,                     // Fila o línea
-                columnaActual - tokenActual.length() // Columna inicial del token
-            ));
+            String lexema = tokenActual.toString();
+            if (tokenActual.length() > 0) {  // Verificar si el token es un método válido
+                tokens.add(new Token(
+                    lexema,                        // Lexema del token
+                    "Método CSS",                  // Expresión regular (ajustable)
+                    "Css",                         // Lenguaje
+                    "Método",                      // Tipo (ajustable)
+                    numeroDeLinea,                 // Fila o línea
+                    columnaActual - tokenActual.length() // Columna inicial del token
+                ));
+            }
         }
 
         return tokens;

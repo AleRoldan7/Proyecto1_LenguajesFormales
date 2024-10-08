@@ -4,6 +4,7 @@
 
 package Inicio;
 
+import AnalizadorHTML.IdentificadorHTML;
 import AnalizadorHTML.TraductorEtiquetas;
 import Interfaz.JFrameInicio;
 import Interfaz.VentanaAnalisis;
@@ -16,6 +17,7 @@ import java.util.Scanner;
 public class Proyecto1AnalizadorLexico {
 
     public static void main(String[] args) {
+        
         
         VentanaAnalisis vn = new VentanaAnalisis();
         vn.setVisible(true);
@@ -37,5 +39,6 @@ public class Proyecto1AnalizadorLexico {
         
         System.out.println("Traducida: "+te.traducirEtiqueta(a));
         */
-    }
+        
+    }     
 }

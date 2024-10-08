@@ -163,8 +163,8 @@ public class JFrameInicio extends javax.swing.JFrame {
         ResultadoAnalisis resultado = ag.analizarTexto(texto);
 
         // Mostrar los resultados del análisis (tokens encontrados)
-        if (!resultado.getTokens().isEmpty()) {
-            ag.mostrarResultados(resultado.getTokens());
+        if (!resultado.getTodosTokens().isEmpty()) {
+           // ag.mostrarResultados(resultado.getTokens());
         } else {
             // Si no se encontraron tokens, mostrar un mensaje
             JFrame ventanaVacia = new JFrame("Sin Resultados");
