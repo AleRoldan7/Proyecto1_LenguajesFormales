@@ -1,41 +1,66 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Interfaz;
 
 import Reportes.Token;
 import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.util.List;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 /**
- *
+ * 
  * @author alejandro
  */
-public class VentanaTraduccion extends JFrame{
-    
-    private JTextArea textArea;
 
-    public VentanaTraduccion(List<Token> tokensEncontrados, String lenguaje) {
+
+public class VentanaTraduccion extends JFrame {
+    
+    private JTextArea textAreaTokens;
+    private JTextArea textAreaCodigoOptimizado;
+    private JTextArea textAreaErrores; // Área para mostrar los errores
+
+    public VentanaTraduccion(List<Token> tokensEncontrados, String lenguaje, String codigoOptimizado) {
         setTitle("Resultados de Análisis - " + lenguaje);
-        setSize(600, 400);
+        setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        
-        textArea = new JTextArea();
-        textArea.setEditable(false); // No permitir la edición del texto
-        JScrollPane scrollPane = new JScrollPane(textArea); // Permitir scroll
-        
+
+        JPanel panelPrincipal = new JPanel(new GridLayout(3, 1)); // Ajustamos para 3 secciones
+
+        // Área de texto para los tokens
+        textAreaTokens = new JTextArea();
+        textAreaTokens.setEditable(false);
+        JScrollPane scrollPaneTokens = new JScrollPane(textAreaTokens);
+
+        // Área para mostrar el código optimizado
+        textAreaCodigoOptimizado = new JTextArea();
+        textAreaCodigoOptimizado.setEditable(false);
+        textAreaCodigoOptimizado.setFont(new Font("Courier", Font.PLAIN, 12)); // Fuente monoespaciada
+        JScrollPane scrollPaneCodigoOptimizado = new JScrollPane(textAreaCodigoOptimizado);
+
+        // Área para mostrar los errores
+        textAreaErrores = new JTextArea();
+        textAreaErrores.setEditable(false);
+        textAreaErrores.setFont(new Font("Courier", Font.PLAIN, 12)); // Fuente monoespaciada
+        JScrollPane scrollPaneErrores = new JScrollPane(textAreaErrores);
+
         // Mostrar los tokens encontrados
         mostrarTokens(tokensEncontrados, lenguaje);
-        
-        add(scrollPane, BorderLayout.CENTER);
+
+        // Mostrar el código optimizado
+        mostrarCodigoOptimizado(codigoOptimizado);
+
+        // Añadir los componentes al panel principal
+        panelPrincipal.add(scrollPaneTokens);
+        panelPrincipal.add(scrollPaneCodigoOptimizado); // Sección de código optimizado
+        panelPrincipal.add(scrollPaneErrores); // Sección para errores
+
+        add(panelPrincipal, BorderLayout.CENTER);
     }
-    
+
     private void mostrarTokens(List<Token> tokensEncontrados, String lenguaje) {
         StringBuilder builder = new StringBuilder();
         builder.append("Lenguaje: ").append(lenguaje).append("\n\n");
@@ -48,8 +73,25 @@ public class VentanaTraduccion extends JFrame{
                    .append("\n");
         }
         
-        textArea.setText(builder.toString());
+        textAreaTokens.setText(builder.toString());
     }
 
+    private void mostrarCodigoOptimizado(String codigoOptimizado) {
+        // Asegúrate de que los saltos de línea se mantengan
+        textAreaCodigoOptimizado.setText(codigoOptimizado);
+    }
 
+    // Método para mostrar errores
+    public void mostrarErrores(List<String> errores) {
+        StringBuilder builder = new StringBuilder();
+        if (errores.isEmpty()) {
+            builder.append("No se encontraron errores.\n");
+        } else {
+            builder.append("Errores encontrados:\n\n");
+            for (String error : errores) {
+                builder.append(error).append("\n");
+            }
+        }
+        textAreaErrores.setText(builder.toString());
+    }
 }

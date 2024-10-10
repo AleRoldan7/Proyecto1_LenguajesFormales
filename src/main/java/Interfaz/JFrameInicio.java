@@ -191,8 +191,8 @@ public class JFrameInicio extends javax.swing.JFrame {
         
         // Analizar el texto y obtener los tokens
         List<Token> tokensHTML = identificadorHTML.obtenerTokensValidos(texto); // Asegúrate de que este método retorne una lista de tokens
-        List<Token> tokensCSS = identificadorCSS.obtenerTokensValidos(texto, 1); // Asegúrate de que este método retorne una lista de tokens
-        List<Token> tokensJS = identificadorJS.obtenerTokensValidos(texto, 1); // Asegúrate de que este método retorne una lista de tokens
+        List<Token> tokensCSS = identificadorCSS.obtenerTokensValidosCSS(texto); // Asegúrate de que este método retorne una lista de tokens
+        List<Token> tokensJS = identificadorJS.obtenerTokensValidosJS(texto); // Asegúrate de que este método retorne una lista de tokens
 
         // Crear una instancia de Reporte y mostrar el reporte
         Reporte reporte = new Reporte();

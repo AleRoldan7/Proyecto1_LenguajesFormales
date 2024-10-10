@@ -4,6 +4,8 @@
  */
 package Reportes;
 
+import java.util.Objects;
+
 /**
  *
  * @author alejandro
@@ -50,6 +52,23 @@ public class Token {
     public int getColumna() {
         return columna;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Token)) return false;
+        Token other = (Token) obj;
+        return lexema.equals(other.lexema) && 
+               lenguaje.equals(other.lenguaje) &&
+               fila == other.fila && 
+               columna == other.columna;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(lexema, lenguaje, fila, columna);
+    }
+
 
     
 }

@@ -24,17 +24,17 @@ public class IdentificadorHTML {
             resultado.append("Token de estado detectado: >>[html]\n");
         }
 
+        // Verificar si es un HTML válido
         if (esHTMLValido(cadena)) {
             resultado.append("Lenguaje HTML detectado\n");
-            resultado.append(analizarEtiquetas(cadena));
-            resultado.append(validarAtributos(cadena));
-            resultado.append(validarCadenas(cadena));
-
-            // Obtener los tokens válidos
-            List<Token> tokens = obtenerTokensValidos(cadena);
+            // Aquí llamamos al método que analiza las etiquetas
+            List<Token> tokens = analizarEtiquetas(cadena);
             for (Token token : tokens) {
                 resultado.append("Token encontrado: ").append(token.getLexema()).append("\n");
             }
+
+            resultado.append(validarAtributos(cadena));
+            resultado.append(validarCadenas(cadena));
 
             String erroresTexto = validarTextoFueraDeEtiquetas(cadena);
             if (!erroresTexto.isEmpty()) {
@@ -49,6 +49,59 @@ public class IdentificadorHTML {
 
         return "Análisis completado."; // O cualquier mensaje que desees
     }
+
+    private List<Token> analizarEtiquetas(String entrada) {
+        List<Token> tokens = new ArrayList<>();
+        List<String> etiquetas = traductor.etiquetasNormales(); // Obtiene las etiquetas válidas desde el traductor
+
+        int i = 0; // Índice para recorrer la cadena de entrada
+        while (i < entrada.length()) {
+            // Verificar el token de estado antes de procesar etiquetas
+            if (entrada.startsWith(">>[html]", i)) {
+                tokens.add(new Token(">>[html]", ">>\\[html\\]", "html", "Token de Estado", 0, 0));
+                i += 8; // Avanzamos más allá del token
+                continue;
+            }
+
+            if (entrada.charAt(i) == '<') {
+                int finEtiqueta = entrada.indexOf('>', i);
+                if (finEtiqueta == -1) break; // No hay cierre de etiqueta
+
+                String etiquetaCompleta = entrada.substring(i + 1, finEtiqueta).trim();
+                String nombreEtiqueta;
+
+                // Separar nombre de la etiqueta de sus atributos
+                if (etiquetaCompleta.contains(" ")) {
+                    nombreEtiqueta = etiquetaCompleta.substring(0, etiquetaCompleta.indexOf(" ")).trim();
+                } else {
+                    nombreEtiqueta = etiquetaCompleta; // No tiene atributos
+                }
+
+                // Verificar si la etiqueta es válida usando el arreglo existente
+                if (etiquetas.contains(nombreEtiqueta)) {
+                    // Agregar el token para la etiqueta
+                    tokens.add(new Token(nombreEtiqueta, "expresión_regular_placeholder", "html", "Etiqueta Normal", 0, 0));
+
+                    // Manejo del texto interno si existe
+                    int inicioTexto = finEtiqueta + 1; // Mover después de '>'
+                    int finTexto = entrada.indexOf('<', inicioTexto);
+                    if (finTexto > inicioTexto) {
+                        String textoInterno = entrada.substring(inicioTexto, finTexto).trim();
+                        if (!textoInterno.isEmpty()) {
+                            tokens.add(new Token(textoInterno, "expresión_regular_placeholder", "html", "Texto Interno", 0, 0));
+                        }
+                    }
+                }
+                i = finEtiqueta; // Mover el índice al final de la etiqueta
+            } else {
+                i++; // Avanzar al siguiente carácter
+            }
+        }
+
+        return tokens;
+    }
+
+
 
     private void generarReporteTokens() {
         if (!tokenEncontrado.isEmpty()) {
@@ -104,51 +157,6 @@ public class IdentificadorHTML {
 
         return stack.isEmpty(); // Asegúrate de que todas las etiquetas están cerradas
     }
-
-    // Método para analizar las etiquetas HTML y generar tokens
-    private List<Token> analizarEtiquetas(String entrada) {
-        List<Token> tokens = new ArrayList<>();
-        List<String> etiquetas = traductor.etiquetasNormales(); // Obtiene las etiquetas válidas desde el traductor
-
-        int i = 0; // Índice para recorrer la cadena de entrada
-        while (i < entrada.length()) {
-            if (entrada.charAt(i) == '<') {
-                int finEtiqueta = entrada.indexOf('>', i);
-                if (finEtiqueta == -1) break; // No hay cierre de etiqueta
-
-                String etiquetaCompleta = entrada.substring(i + 1, finEtiqueta).trim();
-                String nombreEtiqueta;
-
-                // Separar nombre de la etiqueta de sus atributos
-                if (etiquetaCompleta.contains(" ")) {
-                    nombreEtiqueta = etiquetaCompleta.substring(0, etiquetaCompleta.indexOf(" ")).trim();
-                } else {
-                    nombreEtiqueta = etiquetaCompleta; // No tiene atributos
-                }
-
-                // Verificar si la etiqueta es válida usando el arreglo existente
-                if (etiquetas.contains(nombreEtiqueta)) {
-                    // Agregar el token para la etiqueta
-                    tokens.add(new Token(nombreEtiqueta, "expresión_regular_placeholder", "html", "Etiqueta Normal", 0, 0));
-
-                    // Manejo del texto interno si existe
-                    int inicioTexto = finEtiqueta + 1; // Mover después de '>'
-                    int finTexto = entrada.indexOf('<', inicioTexto);
-                    if (finTexto > inicioTexto) {
-                        String textoInterno = entrada.substring(inicioTexto, finTexto).trim();
-                        if (!textoInterno.isEmpty()) {
-                            tokens.add(new Token(textoInterno, "expresión_regular_placeholder", "html", "Texto Interno", 0, 0));
-                        }
-                    }
-                }
-                i = finEtiqueta; // Mover el índice al final de la etiqueta
-            }
-            i++;
-        }
-
-        return tokens;
-    }
-
 
     private void validarPalabrasReservadas(String etiqueta, StringBuilder resultado) {
         for (String palabra : palabraReservada) {
@@ -253,6 +261,7 @@ public class IdentificadorHTML {
         tokenEncontrado.add(nuevoToken);
     }
 
+  
     /*
     public List<Token> obtenerTokensValidos(String linea) {
         List<Token> tokens = new ArrayList<>();
@@ -275,60 +284,72 @@ public class IdentificadorHTML {
     }
     */
     
+    
     public List<Token> obtenerTokensValidos(String linea) {
         List<Token> tokens = new ArrayList<>();
         int i = 0;
 
         while (i < linea.length()) {
-            if (linea.charAt(i) == '<') { // Comienza una etiqueta
-                int finEtiqueta = linea.indexOf('>', i);
-                if (finEtiqueta == -1) break; // No hay cierre de etiqueta, termina el proceso
+            if (linea.charAt(i) == '<') {
+                // Verificar si es un comentario
+                if (i + 3 < linea.length() && linea.charAt(i + 1) == '!' && linea.charAt(i + 2) == '-' && linea.charAt(i + 3) == '-') {
+                    int inicioComentario = i;
+                    i += 4; // Saltamos '<!--'
 
-                String etiquetaCompleta = linea.substring(i + 1, finEtiqueta).trim();
-                String nombreEtiqueta;
-                String atributos = "";
-                String contenido = "";
+                    // Buscar el cierre del comentario
+                    while (i + 2 < linea.length() && !(linea.charAt(i) == '-' && linea.charAt(i + 1) == '-' && linea.charAt(i + 2) == '>')) {
+                        i++;
+                    }
 
-                // Separar nombre de la etiqueta de sus atributos
-                if (etiquetaCompleta.contains(" ")) {
-                    nombreEtiqueta = etiquetaCompleta.substring(0, etiquetaCompleta.indexOf(" ")).trim();
-                    atributos = etiquetaCompleta.substring(etiquetaCompleta.indexOf(" ") + 1).trim();
+                    if (i + 2 < linea.length()) { // Si se encontró el cierre
+                        String comentario = linea.substring(inicioComentario, i + 3);
+                        tokens.add(new Token(comentario, "", "HTML", "Comentario", 0, 0));
+                        i += 3; // Saltamos '-->'
+                    }
                 } else {
-                    nombreEtiqueta = etiquetaCompleta; // No tiene atributos
+                    // Es el inicio de una etiqueta
+                    int inicioEtiqueta = i;
+                    i++; // Saltamos el '<'
+
+                    // Extraer el nombre de la etiqueta (hasta un espacio o '>')
+                    StringBuilder nombreEtiqueta = new StringBuilder();
+                    while (i < linea.length() && linea.charAt(i) != ' ' && linea.charAt(i) != '>') {
+                        nombreEtiqueta.append(linea.charAt(i));
+                        i++;
+                    }
+
+                    // Saltar los atributos de la etiqueta si existen (hasta el cierre '>')
+                    while (i < linea.length() && linea.charAt(i) != '>') {
+                        i++;
+                    }
+
+                    // Si es el cierre de la etiqueta, movemos el índice
+                    if (i < linea.length() && linea.charAt(i) == '>') {
+                        i++; // Saltamos el '>'
+                    }
+
+                    // Agregar el token para la etiqueta de apertura
+                    tokens.add(new Token(nombreEtiqueta.toString(), "", "HTML", "Etiqueta", 0, 0));
+
+                    // Verificar si hay contenido dentro de la etiqueta
+                    StringBuilder contenidoEtiqueta = new StringBuilder();
+                    while (i < linea.length() && linea.charAt(i) != '<') {
+                        contenidoEtiqueta.append(linea.charAt(i));
+                        i++;
+                    }
+
+                    // Si se encontró contenido, agregarlo como token
+                    if (contenidoEtiqueta.length() > 0) {
+                        tokens.add(new Token(contenidoEtiqueta.toString().trim(), "", "HTML", "Contenido", 0, 0));
+                    }
                 }
-
-                // Identificar contenido entre la etiqueta de apertura y cierre
-                int cierreEtiqueta = linea.indexOf("</" + nombreEtiqueta + ">", finEtiqueta);
-                if (cierreEtiqueta != -1) {
-                    contenido = linea.substring(finEtiqueta + 1, cierreEtiqueta).trim();
-                }
-
-                // Agregar tokens de la etiqueta de apertura
-                tokens.add(new Token("<" + nombreEtiqueta + ">", "<" + nombreEtiqueta + ">", "HTML", "Etiqueta de Apertura", 0, 0));
-
-                // Agregar atributos como token si existen
-                if (!atributos.isEmpty()) {
-                    tokens.add(new Token(atributos, atributos, "HTML", "Atributos", 0, 0));
-                }
-
-                // Agregar contenido entre las etiquetas si existe
-                if (!contenido.isEmpty()) {
-                    tokens.add(new Token(contenido, contenido, "HTML", "Contenido", 0, 0));
-                }
-
-                // Agregar tokens de la etiqueta de cierre
-                tokens.add(new Token("</" + nombreEtiqueta + ">", "</" + nombreEtiqueta + ">", "HTML", "Etiqueta de Cierre", 0, 0));
-
-                // Avanzar el índice después de la etiqueta de cierre
-                i = cierreEtiqueta + nombreEtiqueta.length() + 3; // Para avanzar </nombreEtiqueta>
             } else {
-                i++; // Continuar con el siguiente carácter si no es una etiqueta
+                i++; // Avanzar al siguiente carácter
             }
         }
 
         return tokens;
     }
 
-
-
+    
 }

@@ -1,246 +1,225 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package AnalizadorJS;
 
 import Reportes.Token;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-/**
- *
- * @author alejandro
- */
 public class IdentificadorJS {
 
     private String tokenEstadoJS = ">>[js]";
     
-    private char identificador [] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-                                     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                                     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-                                     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
-    
-    private char numeros [] = {'0','1', '2', '3','4', '5', '6','7', '8', '9'};
-    
-    private char signos [] = {'_', '.'};
-    
-    private char aritmeticos [] = {'+', '-', '/', '*'};
-    
-    private String relacionales [] = {"==", "<", ">", "<=", ">=", "!="};
-    
-    private String logicos [] = {"||", "&&", "!"};
-    
-    private String incremento [] = {"++", "--"};
-    
-    private String booleano [] = {"true", "false"};
-    
-    private String palabrasReservadasJS [] = {"function", "const", "let", "document", "event", "alert", "for", "while", "if", "else",
-                                              "return", "console.log", "null"};
-    
-    private char otrosJS [] = {'(', ')', '[', ']', '{', '}', '=', ';', ',', '.', ':'};
-    
-    // Método principal para analizar cadenas JavaScript
+    private String[] palabrasReservadasJS = {
+        "function", "const", "let", "document", "event", "alert", 
+        "for", "while", "if", "else", "return", "console.log", "null"
+    };
+
+    // Operadores Aritméticos
+    private final String[] operadoresAritmeticos = {"+", "-", "*", "/"};
+
+    // Operadores Relacionales
+    private final String[] operadoresRelacionales = {"==", "<", ">", "<=", ">=", "!="};
+
+    // Operadores Lógicos
+    private final String[] operadoresLogicos = {"||", "&&", "!"};
+
+    // Operadores Incrementales
+    private final String[] operadoresIncrementales = {"++", "--"};
+
+    // Otros símbolos
+    private final String[] otrosSimbolos = {"(", ")", "{", "}", "[", "]", "=", ";", ",", ".", ":", "\"", "'", "`"};
+
     public String analizarJS(String cadena) {
         StringBuilder resuJs = new StringBuilder();
 
-        // Verifica si la cadena contiene el estado JavaScript
-        if (cadena.contains(tokenEstadoJS)) {
-            resuJs.append("Lenguaje JavaScript detectado \n");
-            resuJs.append(analizarTokensJS(cadena));
-        } else {
-            resuJs.append("Lenguaje no detectado");
+        // Inicializar el índice de búsqueda
+        int startIndex = 0;
+
+        // Buscar bloques de código JavaScript
+        while ((startIndex = cadena.indexOf(tokenEstadoJS, startIndex)) != -1) {
+            // Extraer solo el contenido después de la etiqueta de estado
+            startIndex += tokenEstadoJS.length();
+            int endIndex = cadena.indexOf(">>", startIndex); // Suponiendo que el bloque JS finaliza con ">>"
+
+            String contenidoJS;
+            if (endIndex != -1) {
+                contenidoJS = cadena.substring(startIndex, endIndex).trim();
+                startIndex = endIndex + 2; // Avanza después del bloque encontrado
+            } else {
+                contenidoJS = cadena.substring(startIndex).trim(); // Captura hasta el final si no se encuentra el final
+                startIndex = cadena.length(); // Marca el final de la cadena
+            }
+
+            if (!contenidoJS.isEmpty()) {
+                resuJs.append("Lenguaje JavaScript detectado \n");
+                resuJs.append(analizarTokensJS(contenidoJS)); // Analizar el contenido
+            } else {
+                resuJs.append("Error: No se encontró contenido JavaScript después de la etiqueta de estado.\n");
+            }
+        }
+
+        if (resuJs.length() == 0) {
+            resuJs.append("Error: Lenguaje no detectado, se requiere la etiqueta >>[js].\n");
         }
 
         return resuJs.toString();
     }
 
-    public List<Token> obtenerTokensValidos(String linea, int numeroDeLinea) {
+
+    public List<Token> obtenerTokensValidosJS(String linea) {
         List<Token> tokens = new ArrayList<>();
-        StringBuilder tokenActual = new StringBuilder();
-        int columnaActual = 1;
+        Set<String> tokensDetectados = new HashSet<>(); // Para evitar duplicaciones
+        int i = 0;
 
-        for (char c : linea.toCharArray()) {
-            if (c == ' ' || c == ';' || c == '{' || c == '}' || c == '(' || c == ')') {
-                if (tokenActual.length() > 0) {
-                    // Agregar el token encontrado
-                    tokens.add(new Token(
-                            tokenActual.toString(),
-                            "Desconocido", // Puedes ajustar la expresión regular según corresponda
-                            "JavaScript",
-                            "Identificador",
-                            numeroDeLinea,
-                            columnaActual - tokenActual.length()
-                    ));
-                    tokenActual.setLength(0);
+        while (i < linea.length()) {
+            // Saltar espacios en blanco
+            //while (i < linea.length() && Character.isWhitespace(linea.charAt(i))) {
+            ///    i++;
+           // }
+
+            // Si encontramos el final de la línea
+            if (i >= linea.length()) {
+                break;
+            }
+
+            // Verificar si es un comentario de una línea
+            if (i + 1 < linea.length() && linea.charAt(i) == '/' && linea.charAt(i + 1) == '/') {
+                int inicioComentario = i;
+                // Avanza más allá de "//"
+                i += 2;
+                // Busca el final del comentario
+                while (i < linea.length() && linea.charAt(i) != '\n') {
+                    i++;
                 }
-                if (c != ' ') {
-                    // Agregar el carácter especial como token
-                    tokens.add(new Token(
-                            String.valueOf(c),
-                            "Desconocido", // Ajustar la expresión regular si es necesario
-                            "JavaScript",
-                            "Símbolo",
-                            numeroDeLinea,
-                            columnaActual
-                    ));
+                // Agrega el comentario a la lista de tokens
+                String comentario = linea.substring(inicioComentario, i);
+                agregarToken(tokens, tokensDetectados, comentario, "Comentario de una línea");
+            }
+            // Verificar si es un comentario de múltiples líneas
+            else if (i + 1 < linea.length() && linea.charAt(i) == '/' && linea.charAt(i + 1) == '*') {
+                int inicioComentario = i;
+                // Avanza más allá de "/*"
+                i += 2;
+                // Busca el final del comentario
+                while (i + 1 < linea.length() && !(linea.charAt(i) == '*' && linea.charAt(i + 1) == '/')) {
+                    i++;
                 }
+                if (i + 1 < linea.length()) { // Si se encontró el cierre
+                    String comentario = linea.substring(inicioComentario, i + 2);
+                    agregarToken(tokens, tokensDetectados, comentario, "Comentario de múltiples líneas");
+                    i += 2; // Avanza más allá de "*/"
+                }
+            }
+            // Verificar si el carácter actual es el inicio de un token
+            else if (Character.isLetter(linea.charAt(i)) || linea.charAt(i) == '_') {
+                // Reconocer identificadores o palabras reservadas
+                StringBuilder identificador = new StringBuilder();
+                while (i < linea.length() && (Character.isLetterOrDigit(linea.charAt(i)) || linea.charAt(i) == '_')) {
+                    identificador.append(linea.charAt(i));
+                    i++;
+                }
+                String lexema = identificador.toString();
+                if (esPalabraReservada(lexema)) {
+                    agregarToken(tokens, tokensDetectados, lexema, "Palabra Reservada");
+                } else {
+                    agregarToken(tokens, tokensDetectados, lexema, "Identificador");
+                }
+            } else if (Character.isDigit(linea.charAt(i))) {
+                // Reconocer números (Enteros y Decimales)
+                StringBuilder numero = new StringBuilder();
+                while (i < linea.length() && (Character.isDigit(linea.charAt(i)) || linea.charAt(i) == '.')) {
+                    numero.append(linea.charAt(i));
+                    i++;
+                }
+                agregarToken(tokens, tokensDetectados, numero.toString(), "Número");
             } else {
-                tokenActual.append(c);
-            }
-            columnaActual++;
-        }
+                // Reconocer operadores, otros símbolos o cadenas
+                StringBuilder simbolo = new StringBuilder();
+                while (i < linea.length() && !Character.isWhitespace(linea.charAt(i))) {
+                    simbolo.append(linea.charAt(i));
+                    i++;
+                }
+                String lexema = simbolo.toString();
 
-        // Añadir el último token que pudo haber quedado
-        if (tokenActual.length() > 0) {
-            tokens.add(new Token(
-                    tokenActual.toString(),
-                    "Desconocido",
-                    "JavaScript",
-                    "Identificador",
-                    numeroDeLinea,
-                    columnaActual - tokenActual.length()
-            ));
+                // Identificar si es un operador, símbolo u otro tipo
+                if (esOperador(lexema)) {
+                    agregarToken(tokens, tokensDetectados, lexema, "Operador");
+                } else if (esSimbolo(lexema)) {
+                    agregarToken(tokens, tokensDetectados, lexema, "Símbolo");
+                } else if (esCadena(lexema)) {
+                    agregarToken(tokens, tokensDetectados, lexema, "Cadena");
+                }
+            }
         }
 
         return tokens;
     }
 
 
-
-    // Método auxiliar para buscar palabras reservadas
-    private List<String> buscarPalabrasReservadas(String entrada) {
-        List<String> tokens = new ArrayList<>();
-        for (String palabra : palabrasReservadasJS) {
-            if (entrada.contains(palabra)) {
-                tokens.add(palabra);
-            }
+    // Método para agregar tokens a la lista, asegurando que no se dupliquen
+    private void agregarToken(List<Token> tokens, Set<String> tokensDetectados, String lexema, String tipo) {
+        if (!tokensDetectados.contains(lexema)) {
+            tokens.add(new Token(lexema, "", "JavaScript", tipo, 0, 0));
+            tokensDetectados.add(lexema); // Añadir a los detectados
         }
-        return tokens;
     }
 
-    // Método auxiliar para buscar valores booleanos
-    private List<String> buscarValoresBooleanos(String entrada) {
-        List<String> tokens = new ArrayList<>();
-        for (String bool : booleano) {
-            if (entrada.contains(bool)) {
-                tokens.add(bool);
+    // Verifica si una palabra es una palabra reservada de JavaScript
+    private boolean esPalabraReservada(String palabra) {
+        for (String reservada : palabrasReservadasJS) {
+            if (reservada.equals(palabra)) {
+                return true;
             }
         }
-        return tokens;
+        return false;
     }
 
-    // Método auxiliar para buscar operadores relacionales
-    private List<String> buscarOperadoresRelacionales(String entrada) {
-        List<String> tokens = new ArrayList<>();
-        for (String rel : relacionales) {
-            if (entrada.contains(rel)) {
-                tokens.add(rel);
-            }
+    // Verifica si el lexema es un operador
+    private boolean esOperador(String lexema) {
+        for (String operador : operadoresAritmeticos) {
+            if (operador.equals(lexema)) return true;
         }
-        return tokens;
+        for (String operador : operadoresRelacionales) {
+            if (operador.equals(lexema)) return true;
+        }
+        for (String operador : operadoresLogicos) {
+            if (operador.equals(lexema)) return true;
+        }
+        for (String operador : operadoresIncrementales) {
+            if (operador.equals(lexema)) return true;
+        }
+        return false;
     }
 
-    // Método auxiliar para buscar operadores lógicos
-    private List<String> buscarOperadoresLogicos(String entrada) {
-        List<String> tokens = new ArrayList<>();
-        for (String log : logicos) {
-            if (entrada.contains(log)) {
-                tokens.add(log);
-            }
+    // Verifica si el lexema es un símbolo
+    private boolean esSimbolo(String lexema) {
+        for (String simbolo : otrosSimbolos) {
+            if (simbolo.equals(lexema)) return true;
         }
-        return tokens;
+        return false;
     }
 
-    // Método auxiliar para buscar operadores de incremento/decremento
-    private List<String> buscarOperadoresIncremento(String entrada) {
-        List<String> tokens = new ArrayList<>();
-        for (String inc : incremento) {
-            if (entrada.contains(inc)) {
-                tokens.add(inc);
-            }
-        }
-        return tokens;
+    // Verifica si el lexema es una cadena
+    private boolean esCadena(String lexema) {
+        return (lexema.startsWith("\"") && lexema.endsWith("\"")) || 
+               (lexema.startsWith("'") && lexema.endsWith("'")) || 
+               (lexema.startsWith("`") && lexema.endsWith("`"));
     }
 
-    // Método auxiliar para buscar operadores aritméticos
-    private List<String> buscarOperadoresAritmeticos(String entrada) {
-        List<String> tokens = new ArrayList<>();
-        for (char arit : aritmeticos) {
-            if (entrada.indexOf(arit) != -1) {
-                tokens.add(String.valueOf(arit));
-            }
-        }
-        return tokens;
-    }
-
-    // Método auxiliar para buscar otros tokens (caracteres especiales)
-    private List<String> buscarOtrosTokens(String entrada) {
-        List<String> tokens = new ArrayList<>();
-        for (char otro : otrosJS) {
-            if (entrada.indexOf(otro) != -1) {
-                tokens.add(String.valueOf(otro));
-            }
-        }
-        return tokens;
-    }
-    
     // Analiza los tokens en la cadena JS y devuelve una descripción detallada
     private String analizarTokensJS(String entrada) {
         StringBuilder resultado = new StringBuilder();
+        List<Token> tokensValidos = obtenerTokensValidosJS(entrada);
 
-        // Verificar y analizar palabras reservadas de JS
-        for (String palabra : palabrasReservadasJS) {
-            if (entrada.contains(palabra)) {
-                resultado.append("Palabra reservada JS detectada: " + palabra + "\n");
-            }
-        }
-
-        // Verificar y analizar valores booleanos
-        for (String bool : booleano) {
-            if (entrada.contains(bool)) {
-                resultado.append("Valor booleano detectado: " + bool + "\n");
-            }
-        }
-
-        // Verificar y analizar operadores relacionales
-        for (String rel : relacionales) {
-            if (entrada.contains(rel)) {
-                resultado.append("Operador relacional detectado: " + rel + "\n");
-            }
-        }
-
-        // Verificar y analizar operadores lógicos
-        for (String log : logicos) {
-            if (entrada.contains(log)) {
-                resultado.append("Operador lógico detectado: " + log + "\n");
-            }
-        }
-
-        // Verificar y analizar operadores de incremento o decremento
-        for (String inc : incremento) {
-            if (entrada.contains(inc)) {
-                resultado.append("Operador de incremento/decremento detectado: " + inc + "\n");
-            }
-        }
-
-        // Verificar y analizar operadores aritméticos
-        for (char arit : aritmeticos) {
-            if (entrada.indexOf(arit) != -1) {
-                resultado.append("Operador aritmético detectado: " + arit + "\n");
-            }
-        }
-
-        // Verificar y analizar otros tokens como paréntesis, corchetes, etc.
-        for (char otro : otrosJS) {
-            if (entrada.indexOf(otro) != -1) {
-                resultado.append("Otro token detectado: " + otro + "\n");
+        if (tokensValidos.isEmpty()) {
+            resultado.append("No se detectaron tokens válidos.\n");
+        } else {
+            for (Token token : tokensValidos) {
+                resultado.append("Token detectado: ").append(token.getLexema()).append(", Tipo: ").append(token.getTipo()).append("\n");
             }
         }
 
         return resultado.toString();
     }
-    
-     
-
 }

@@ -4,10 +4,9 @@ import AnalizadorCSS.IdentificadorCSS;
 import AnalizadorGeneral.AnalizarGeneral;
 import AnalizadorHTML.IdentificadorHTML;
 import AnalizadorJS.IdentificadorJS;
-import CreadorHTML.GeneradorHTML;
 import Reportes.Reporte;
-import Reportes.ResultadoAnalisis;
 import Reportes.Token;
+import Reportes.mostrarErrores; // Importar la clase mostrarErrores
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -38,6 +37,7 @@ public class VentanaAnalisis extends JFrame implements ActionListener {
     private JButton botonCargarArchivo;
     private JButton botonVerReporte;
     private JButton botonGenerarHTML;  
+    private JButton botonReporteError;
     private IdentificadorHTML identificadorHTML = new IdentificadorHTML();
     private IdentificadorCSS identificadorCSS = new IdentificadorCSS();
     private IdentificadorJS identificadorJS = new IdentificadorJS();
@@ -60,21 +60,24 @@ public class VentanaAnalisis extends JFrame implements ActionListener {
         botonCargarArchivo = new JButton("Cargar Archivo");
         botonVerReporte = new JButton("Ver Reportes");
         botonGenerarHTML = new JButton("Generar HTML"); 
-
+        botonReporteError = new JButton("Reporte Error");
+        
         // Agregar los listeners a los botones
         botonAnalizar.addActionListener(this);
         botonCargarArchivo.addActionListener(this);
         botonVerReporte.addActionListener(this);
         botonGenerarHTML.addActionListener(this);  
-
+        botonReporteError.addActionListener(this);
+        
         // Crear un panel para los botones
         JPanel panelBotones = new JPanel();
-        panelBotones.setLayout(new GridLayout(1, 4, 10, 10));
+        panelBotones.setLayout(new GridLayout(1, 5, 10, 10)); // Ajustar para 5 botones
         panelBotones.add(botonAnalizar);
         panelBotones.add(botonCargarArchivo);
         panelBotones.add(botonVerReporte);
         panelBotones.add(botonGenerarHTML);  
-
+        panelBotones.add(botonReporteError);
+        
         // Agregar el área de texto y los botones al JFrame
         add(scrollPane, BorderLayout.CENTER);
         add(panelBotones, BorderLayout.NORTH);
@@ -90,6 +93,8 @@ public class VentanaAnalisis extends JFrame implements ActionListener {
             verReporte();
         } else if (e.getSource() == botonGenerarHTML) {
             generarHTML();
+        } else if (e.getSource() == botonReporteError) {
+            mostrarReporteErrores();  // Llamada al nuevo método
         }
     }
 
@@ -97,11 +102,42 @@ public class VentanaAnalisis extends JFrame implements ActionListener {
         // Obtener el texto ingresado en el JTextArea
         String texto = areaTexto.getText();
 
+        // Verificar si el texto contiene alguna etiqueta de estado válida
+        if (!texto.contains("[html]") && !texto.contains("[css]") && !texto.contains("[js]")) {
+            JOptionPane.showMessageDialog(this, "Error: No se encontraron etiquetas de estado válidas. Por favor, use [html], [css], o [js].", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         // Crear una instancia de la clase AnalizarGeneral
         AnalizarGeneral ag = new AnalizarGeneral();
 
         // Mostrar los resultados del análisis
         ag.mostrarResultados(texto);
+        areaTexto.setText(texto);
+    }
+
+    private void verReporte() {
+        String texto = areaTexto.getText().trim();
+
+        if (texto.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor, ingrese texto para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Verificar si el texto contiene alguna etiqueta de estado válida
+        if (!texto.contains("[html]") && !texto.contains("[css]") && !texto.contains("[js]")) {
+            JOptionPane.showMessageDialog(this, "Error: No se encontraron etiquetas de estado válidas. Por favor, use [html], [css], o [js].", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Obtener los tokens válidos de cada analizador
+        List<Token> tokensHTML = identificadorHTML.obtenerTokensValidos(texto);
+        List<Token> tokensCSS = identificadorCSS.obtenerTokensValidosCSS(texto);
+        List<Token> tokensJS = identificadorJS.obtenerTokensValidosJS(texto);
+
+        // Mostrar el reporte
+        Reporte reporte = new Reporte();
+        reporte.mostrarReporte(tokensHTML, tokensCSS, tokensJS);
     }
 
     // Método para cargar un archivo de texto y mostrar su contenido en el área de texto
@@ -118,23 +154,6 @@ public class VentanaAnalisis extends JFrame implements ActionListener {
         }
     }
 
-    // Método para ver los reportes generados
-    private void verReporte() {
-        String texto = areaTexto.getText().trim();
-
-        if (texto.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Por favor, ingrese texto para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        List<Token> tokensHTML = identificadorHTML.obtenerTokensValidos(texto);
-        List<Token> tokensCSS = identificadorCSS.obtenerTokensValidos(texto, 1);
-        List<Token> tokensJS = identificadorJS.obtenerTokensValidos(texto, 1);
-
-        Reporte reporte = new Reporte();
-        reporte.mostrarReporte(tokensHTML, tokensCSS, tokensJS);
-    }
-
     // Método para generar el HTML si el análisis es correcto
     private void generarHTML() {
         String texto = areaTexto.getText().trim();
@@ -146,16 +165,22 @@ public class VentanaAnalisis extends JFrame implements ActionListener {
 
         // Obtener los tokens
         List<Token> tokensHTML = identificadorHTML.obtenerTokensValidos(texto);
-        List<Token> tokensCSS = identificadorCSS.obtenerTokensValidos(texto, 1);
-        List<Token> tokensJS = identificadorJS.obtenerTokensValidos(texto, 1);
+        List<Token> tokensCSS = identificadorCSS.obtenerTokensValidosCSS(texto);
+        List<Token> tokensJS = identificadorJS.obtenerTokensValidosJS(texto);
 
         // Si no hay errores, generar el archivo HTML
         if (!tokensHTML.isEmpty() || !tokensCSS.isEmpty() || !tokensJS.isEmpty()) {
-            GeneradorHTML generador = new GeneradorHTML();
-            generador.generarHTML(tokensHTML);
+            // GeneradorHTML generador = new GeneradorHTML();
+            // generador.generarHTML(tokensHTML);
             JOptionPane.showMessageDialog(this, "HTML generado exitosamente.", "Resultado", JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(this, "No se puede generar HTML, ya que no se encontraron tokens válidos.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    // Método para mostrar la ventana de errores
+    private void mostrarReporteErrores() {
+        mostrarErrores ventanaErrores = new mostrarErrores();
+        ventanaErrores.setVisible(true);
     }
 }

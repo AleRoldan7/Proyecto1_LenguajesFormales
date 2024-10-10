@@ -1,13 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Reportes;
 
-
 import java.awt.BorderLayout;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -15,13 +11,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-
 /**
  *
  * @author alejandro
  */
 public class Reporte {
-   
+
     // Método para mostrar el reporte de tokens de diferentes analizadores
     public void mostrarReporte(List<Token> tokensHTML, List<Token> tokensCSS, List<Token> tokensJS) {
         
@@ -39,13 +34,13 @@ public class Reporte {
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
         JTable table = new JTable(tableModel);
 
-        // Combinar las listas de tokens de diferentes analizadores
-        List<Token> todosLosTokens = new ArrayList<>();
+        // Usar un Set para evitar duplicados
+        Set<Token> todosLosTokens = new HashSet<>();
         todosLosTokens.addAll(tokensHTML);
         todosLosTokens.addAll(tokensCSS);
         todosLosTokens.addAll(tokensJS);
 
-        // Agregar los tokens al modelo de la tabla
+        // Agregar los tokens únicos al modelo de la tabla
         for (Token token : todosLosTokens) {
             Object[] rowData = {
                 token.getLexema(),
@@ -58,6 +53,18 @@ public class Reporte {
             tableModel.addRow(rowData);
         }
 
+        // Agregar etiquetas de estado si no hay tokens
+        if (tokensHTML.isEmpty() && tokensCSS.isEmpty() && tokensJS.isEmpty()) {
+            agregarEstado(tableModel, "[html]", null);
+            agregarEstado(tableModel, "[css]", null);
+            agregarEstado(tableModel, "[js]", null);
+        } else {
+            // Agregar etiquetas de estado
+            agregarEstado(tableModel, "[html]", tokensHTML);
+            agregarEstado(tableModel, "[css]", tokensCSS);
+            agregarEstado(tableModel, "[js]", tokensJS);
+        }
+
         JScrollPane scrollPane = new JScrollPane(table);
         panel.add(scrollPane, BorderLayout.CENTER);
 
@@ -66,5 +73,19 @@ public class Reporte {
         panel.add(closeButton, BorderLayout.SOUTH);
 
         dialog.setVisible(true);
+    }
+
+    // Método para agregar etiquetas de estado al modelo de la tabla
+    private void agregarEstado(DefaultTableModel tableModel, String lenguaje, List<Token> tokens) {
+        // Agregar una fila que indica el lenguaje
+        Object[] rowData = {
+            lenguaje, 
+            "", // Expresión Regular
+            lenguaje, // Lenguaje
+            "Estado", // Tipo
+            "", // Fila
+            ""  // Columna
+        };
+        tableModel.addRow(rowData);
     }
 }
