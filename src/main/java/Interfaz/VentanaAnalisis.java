@@ -36,7 +36,6 @@ public class VentanaAnalisis extends JFrame implements ActionListener {
     private JButton botonAnalizar;
     private JButton botonCargarArchivo;
     private JButton botonVerReporte;
-    private JButton botonGenerarHTML;  
     private JButton botonReporteError;
     private IdentificadorHTML identificadorHTML = new IdentificadorHTML();
     private IdentificadorCSS identificadorCSS = new IdentificadorCSS();
@@ -59,14 +58,12 @@ public class VentanaAnalisis extends JFrame implements ActionListener {
         botonAnalizar = new JButton("Analizar Código");
         botonCargarArchivo = new JButton("Cargar Archivo");
         botonVerReporte = new JButton("Ver Reportes");
-        botonGenerarHTML = new JButton("Generar HTML"); 
         botonReporteError = new JButton("Reporte Error");
         
         // Agregar los listeners a los botones
         botonAnalizar.addActionListener(this);
         botonCargarArchivo.addActionListener(this);
         botonVerReporte.addActionListener(this);
-        botonGenerarHTML.addActionListener(this);  
         botonReporteError.addActionListener(this);
         
         // Crear un panel para los botones
@@ -75,7 +72,6 @@ public class VentanaAnalisis extends JFrame implements ActionListener {
         panelBotones.add(botonAnalizar);
         panelBotones.add(botonCargarArchivo);
         panelBotones.add(botonVerReporte);
-        panelBotones.add(botonGenerarHTML);  
         panelBotones.add(botonReporteError);
         
         // Agregar el área de texto y los botones al JFrame
@@ -91,9 +87,7 @@ public class VentanaAnalisis extends JFrame implements ActionListener {
             cargarArchivo();
         } else if (e.getSource() == botonVerReporte) {
             verReporte();
-        } else if (e.getSource() == botonGenerarHTML) {
-            generarHTML();
-        } else if (e.getSource() == botonReporteError) {
+        }  else if (e.getSource() == botonReporteError) {
             mostrarReporteErrores();  // Llamada al nuevo método
         }
     }
@@ -132,7 +126,7 @@ public class VentanaAnalisis extends JFrame implements ActionListener {
 
         // Obtener los tokens válidos de cada analizador
         List<Token> tokensHTML = identificadorHTML.obtenerTokensValidos(texto);
-        List<Token> tokensCSS = identificadorCSS.obtenerTokensValidosCSS(texto);
+        List<Token> tokensCSS = identificadorCSS.analizarLinea(texto);
         List<Token> tokensJS = identificadorJS.obtenerTokensValidosJS(texto);
 
         // Mostrar el reporte
@@ -165,7 +159,7 @@ public class VentanaAnalisis extends JFrame implements ActionListener {
 
         // Obtener los tokens
         List<Token> tokensHTML = identificadorHTML.obtenerTokensValidos(texto);
-        List<Token> tokensCSS = identificadorCSS.obtenerTokensValidosCSS(texto);
+        List<Token> tokensCSS = identificadorCSS.analizarLinea(texto);
         List<Token> tokensJS = identificadorJS.obtenerTokensValidosJS(texto);
 
         // Si no hay errores, generar el archivo HTML

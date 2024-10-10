@@ -6,7 +6,6 @@ package Inicio;
 
 import AnalizadorHTML.IdentificadorHTML;
 import AnalizadorHTML.TraductorEtiquetas;
-import Interfaz.JFrameInicio;
 import Interfaz.VentanaAnalisis;
 import java.util.Scanner;
 

@@ -136,7 +136,7 @@ public class AnalizarGeneral {
         List<Token> tokens = new ArrayList<>(); 
         switch (lenguaje) {
             case "[html]":
-                System.out.println("Procesando HTML: " + linea); // Debug
+              
                 tokens = identificadorHTML.obtenerTokensValidos(linea);
                 break;
             case "[js]":
@@ -145,7 +145,7 @@ public class AnalizarGeneral {
                 break;
             case "[css]":
                 System.out.println("Procesando CSS: " + linea); // Debug
-                tokens = identificadorCSS.obtenerTokensValidosCSS(linea);
+                tokens = identificadorCSS.analizarLinea(linea);
                 break;
             default:
                 System.out.println("Lenguaje desconocido: " + lenguaje);

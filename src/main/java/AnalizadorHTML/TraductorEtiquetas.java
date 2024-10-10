@@ -142,4 +142,16 @@ public class TraductorEtiquetas {
             return "Etiqueta no encontrada";
         }
     }
+    
+    
+    public int posiEtiquetas(String cadena){
+        
+        for (int i = 0; i < etiquetasNormales().size(); i++) {
+            String tmp = etiquetasNormales().get(i);
+            if (cadena.equals(tmp)) {
+                return i;
+            }
+        }
+        return 0;
+    }
 }

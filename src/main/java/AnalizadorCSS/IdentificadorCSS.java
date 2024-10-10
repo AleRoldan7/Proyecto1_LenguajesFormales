@@ -10,35 +10,7 @@ import java.util.List;
  */
 public class IdentificadorCSS {
     
-    private String tokenEstado = ">>[css]";
-    
-    private char tokenUniversal[] = {'*'};
-    
-    private String tokenEtiqueta[] = {"body", "header", "main", "nav", "aside", "div", "ul",
-                                       "ol", "li", "a", "h1", "h2", "h3", "h4", "h5", "h6", "p",
-                                       "span", "label", "textarea", "button", "section", "article", "footer"};
-    
-    private char tokenClaseLetras[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-                                        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
-    
-    private char tokenClaseNumero[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    
-    private char tokenClaseSigno[] = {'.', '-', '#'};
-    
-    private char tokenCombinador[] = {'>', '+', '~'};
-    
-    private String tokenReglas[] = {"color", "background-color", "background", "font-size", "font-weight", "font-family",
-                                     "font-align", "width", "height", "min-width", "min-height", "max-width", "max-height", 
-                                     "display", "inline", "block", "inline-block", "flex", "grid", "none", "margin", "border",
-                                     "padding", "content", "border-color", "border-style", "border-width", "border-top", "border-bottom",
-                                     "border-left", "border-right", "box-sizing", "border-box", "position", "static", "relative", "absolute",
-                                     "sticky", "fixed", "top", "bottom", "left", "right", "z-index", "justify-content", "align-items", "border-radius",
-                                     "auto", "float", "list-style", "text-align", "box-shadow"};
-    
-    private String tokenOtros[] = {"px", "%", "rem", "em", "vw", "vh", ":hover", ":active", ":not()", ":nth-child()", "odd", "even",
-                                    "::before", "::after", ":", ";", ",", "(", ")", " "};
-    
-    private List<String> tokensValidos = new ArrayList<>();
+   private List<String> tokensValidos = new ArrayList<>();
 
     public void analizar(String entrada) {
         if (!esCadenaCssValida(entrada)) {
@@ -46,15 +18,14 @@ public class IdentificadorCSS {
             return;
         }
 
-        // Procesar entrada CSS
         String[] lineas = entrada.split("\n");
         for (String linea : lineas) {
+            if (linea.trim().isEmpty()) continue;
+
             // Lógica para analizar cada línea y obtener tokens
-            String resultado = analizarEtiquetasCss(linea);
-            System.out.println(resultado); // Imprimir resultado de la línea analizada
-            if (linea.contains("{")) {
-                // Extraer propiedades
-                extraerPropiedades(linea);
+            List<Token> tokens = analizarLinea(linea);
+            for (Token token : tokens) {
+                System.out.println(token.getLexema());
             }
         }
     }
@@ -63,161 +34,167 @@ public class IdentificadorCSS {
         return cadena.contains("{") && cadena.contains("}");
     }
 
-    private void extraerPropiedades(String linea) {
-        String propiedades = linea.substring(linea.indexOf('{') + 1, linea.indexOf('}')).trim();
-        if (!propiedades.isEmpty()) {
-            tokensValidos.add(propiedades);
-        }
-    }
- 
-    private String analizarEtiquetasCss(String entrada) {
-        StringBuilder resultado = new StringBuilder();
-
-        // Uso de una sola iteración para verificar etiquetas, reglas y otros tokens
-        for (String token : tokenEtiqueta) {
-            if (entrada.contains(token)) {
-                resultado.append("Etiqueta CSS detectada: ").append(token).append("\n");
-                guardarTokensValidos(token);
-            }
-        }
-
-        for (String regla : tokenReglas) {
-            if (entrada.contains(regla)) {
-                resultado.append("Regla CSS detectada: ").append(regla).append("\n");
-                guardarTokensValidos(regla);
-            }
-        }
-
-        for (String otro : tokenOtros) {
-            if (entrada.contains(otro)) {
-                resultado.append("Otro token CSS detectado: ").append(otro).append("\n");
-                guardarTokensValidos(otro);
-            }
-        }
-
-        // Detectar selectores universales
-        for (char universal : tokenUniversal) {
-            if (entrada.indexOf(universal) != -1) {
-                resultado.append("Selector Universal detectado: ").append(universal).append("\n");
-                guardarTokensValidos(String.valueOf(universal));
-            }
-        }
-
-        // Detectar combinadores
-        for (char combinador : tokenCombinador) {
-            if (entrada.indexOf(combinador) != -1) {
-                resultado.append("Combinador detectado: ").append(combinador).append("\n");
-                guardarTokensValidos(String.valueOf(combinador));
-            }
-        }
-
-        return resultado.toString();
-    }
-
-    public List<Token> obtenerTokensValidosCSS(String linea) {
+    public List<Token> analizarLinea(String linea) {
         List<Token> tokens = new ArrayList<>();
         int i = 0;
 
         while (i < linea.length()) {
-            // Saltar espacios en blanco
-            while (i < linea.length() && Character.isWhitespace(linea.charAt(i))) {
+            char actual = linea.charAt(i);
+
+            // Ignorar espacios
+            if (Character.isWhitespace(actual)) {
                 i++;
+                continue;
             }
 
-            // Si encontramos el final de la línea
-            if (i >= linea.length()) {
-                break;
+            // Procesar comas, dos puntos, punto y coma
+            if (actual == ',') {
+                tokens.add(new Token(",", "", "CSS", "Coma", 0, 0));
+                i++;
+                continue;
+            }
+            if (actual == ':') {
+                tokens.add(new Token(":", "", "CSS", "Dos puntos", 0, 0));
+                i++;
+                continue;
+            }
+            if (actual == ';') {
+                tokens.add(new Token(";", "", "CSS", "Punto y coma", 0, 0));
+                i++;
+                continue;
             }
 
-            // Verificar si es el inicio de un comentario
-            if (i + 1 < linea.length() && linea.charAt(i) == '/' && linea.charAt(i + 1) == '*') {
-                int inicioComentario = i;
-                i += 2; // Saltamos '/*'
-
-                // Buscar el cierre del comentario
-                while (i + 1 < linea.length() && !(linea.charAt(i) == '*' && linea.charAt(i + 1) == '/')) {
+            // Procesar comillas simples
+            if (actual == '\'') {
+                int inicio = i;
+                i++;
+                while (i < linea.length() && linea.charAt(i) != '\'') {
                     i++;
                 }
-
-                if (i + 1 < linea.length()) { // Si se encontró el cierre
-                    String comentario = linea.substring(inicioComentario, i + 2);
-                    tokens.add(new Token(comentario, "", "CSS", "Comentario", 0, 0));
-                    i += 2; // Saltamos '*/'
+                if (i < linea.length()) {
+                    String contenido = linea.substring(inicio, i + 1);
+                    tokens.add(new Token(contenido, "", "CSS", "Cadena", 0, 0));
+                    i++;
                 }
-                continue; // Continuar al siguiente ciclo para evitar procesar más caracteres
+                continue;
             }
 
-            // Extraer un selector
-            StringBuilder selector = new StringBuilder();
-            while (i < linea.length() && linea.charAt(i) != '{') {
-                selector.append(linea.charAt(i));
+            // Procesar colores hexadecimales y rgba
+            if (actual == '#') {
+                int inicio = i;
                 i++;
-            }
-
-            // Si encontramos '{', es el inicio de una regla
-            if (i < linea.length() && linea.charAt(i) == '{') {
-                String selectorTrimmed = selector.toString().trim();
-                if (!selectorTrimmed.isEmpty()) {
-                    tokens.add(new Token(selectorTrimmed, "", "CSS", "Selector", 0, 0));
-                    i++; // Saltamos '{'
-
-                    // Extraer las propiedades
-                    String propiedades = extraerPropiedades(linea, i);
-                    if (propiedades != null) {
-                        tokens.add(new Token(propiedades, "", "CSS", "Propiedades", 0, 0));
-                        i += propiedades.length() + 1; // Saltamos '}'
-                    }
+                while (i < linea.length() && (Character.isDigit(linea.charAt(i)) || 
+                                               (linea.charAt(i) >= 'a' && linea.charAt(i) <= 'f'))) {
+                    i++;
+                }
+                // Validar si es un color hexadecimal
+                String hexColor = linea.substring(inicio, i);
+                if (hexColor.length() == 4 || hexColor.length() == 7) {
+                    tokens.add(new Token(hexColor, "", "CSS", "Color Hexadecimal", 0, 0));
+                    continue;
                 }
             }
+
+            // Procesar rgba
+            if (linea.startsWith("rgba(", i)) {
+                int inicio = i;
+                i += 5; // Saltar "rgba("
+                int count = 0;
+                StringBuilder rgbaBuilder = new StringBuilder("rgba(");
+                while (i < linea.length() && count < 4) {
+                    char c = linea.charAt(i);
+                    rgbaBuilder.append(c);
+                    if (c == ',' || c == ')') {
+                        count++;
+                    }
+                    i++;
+                }
+                if (count == 4) {
+                    tokens.add(new Token(rgbaBuilder.toString(), "", "CSS", "Color RGBA", 0, 0));
+                    continue;
+                }
+                i = inicio; // Reiniciar si no se validó
+            }
+
+            // Identificar y procesar selectores
+            if (actual == '.' || actual == '#') {
+                int inicio = i;
+                i = procesarSelector(linea, i, tokens);
+                if (i == -1) return tokens; // Error en el procesamiento
+                continue;
+            }
+
+            // Procesar llaves
+            if (actual == '{') {
+                tokens.add(new Token("{", "", "CSS", "Llave Apertura", 0, 0));
+                i++;
+                continue;
+            }
+            if (actual == '}') {
+                tokens.add(new Token("}", "", "CSS", "Llave Cierre", 0, 0));
+                i++;
+                continue;
+            }
+
+            // Procesar enteros
+            if (Character.isDigit(actual)) {
+                int inicio = i;
+                while (i < linea.length() && Character.isDigit(linea.charAt(i))) {
+                    i++;
+                }
+                String entero = linea.substring(inicio, i);
+                tokens.add(new Token(entero, "", "CSS", "Entero", 0, 0));
+                continue;
+            }
+
+            // Procesar combinadores
+            if (actual == '>' || actual == '+' || actual == '~') {
+                tokens.add(new Token(String.valueOf(actual), "", "CSS", "Combinador", 0, 0));
+                i++;
+                continue;
+            }
+
+            // Procesar identificadores
+            if (Character.isLetter(actual)) {
+                int inicio = i;
+                while (i < linea.length() && (Character.isLetter(linea.charAt(i)) || Character.isDigit(linea.charAt(i)) || linea.charAt(i) == '-')) {
+                    i++;
+                }
+                String identificador = linea.substring(inicio, i);
+                // Validar si es un selector de ID
+                if (identificador.startsWith("#") && identificador.matches("#[a-z][a-z0-9-]*")) {
+                    tokens.add(new Token(identificador, "", "CSS", "Selector ID", 0, 0));
+                } else {
+                    tokens.add(new Token(identificador, "", "CSS", "Identificador", 0, 0));
+                }
+                continue;
+            }
+
+            // Si llegamos aquí, hemos encontrado un carácter no reconocido
+            i++;
         }
 
+        // Imprimir los tokens para verificar qué se ha agregado
+        for (Token token : tokens) {
+            System.out.println("Agregar " + token.getLexema());
+        }
         return tokens;
     }
 
-    // Método para extraer las propiedades hasta encontrar '}'
-    private String extraerPropiedades(String linea, int startIndex) {
-        StringBuilder propiedades = new StringBuilder();
-        int i = startIndex;
+    private int procesarSelector(String linea, int i, List<Token> tokens) {
+        char tipo = linea.charAt(i); // Tipo de selector: '.' o '#'
+        i++; // Saltamos el punto o la almohadilla
+        int inicio = i; // Guardamos el inicio del identificador
 
-        while (i < linea.length() && linea.charAt(i) != '}') {
-            // Saltar espacios en blanco
-            while (i < linea.length() && Character.isWhitespace(linea.charAt(i))) {
-                i++;
-            }
-
-            // Agregar propiedades válidas
-            StringBuilder propiedad = new StringBuilder();
-            while (i < linea.length() && linea.charAt(i) != ';' && linea.charAt(i) != '}') {
-                propiedad.append(linea.charAt(i));
-                i++;
-            }
-
-            // Agregar propiedad si no está vacía
-            if (propiedad.length() > 0) {
-                propiedades.append(propiedad.toString().trim()).append(';');
-            }
-
-            // Si encontramos un ';', continuamos
-            if (i < linea.length() && linea.charAt(i) == ';') {
-                i++; // Saltamos ';'
-            }
+        // Extraer el nombre del selector
+        while (i < linea.length() && (Character.isLetter(linea.charAt(i)) || Character.isDigit(linea.charAt(i)) || linea.charAt(i) == '-' || linea.charAt(i) == '.')) {
+            i++;
         }
 
-        // Si encontramos '}', es el final de las propiedades
-        if (i < linea.length() && linea.charAt(i) == '}') {
-            return propiedades.toString().trim();
-        }
-        
-        return null; // No se encontraron propiedades válidas
-    }
+        String selector = linea.substring(inicio - 1, i); // Incluimos el '.' o '#' al inicio
+        String tipoSelector = (tipo == '.') ? "Clase" : "ID";
+        tokens.add(new Token(selector, "", "CSS", tipoSelector, 0, 0));
 
-    private void guardarTokensValidos(String token) {
-        if (!tokensValidos.contains(token)) {
-            tokensValidos.add(token);
-        }
-    }
-    
-    public List<String> getTokensValidos() {
-        return tokensValidos;
+        return i; // Retornamos la posición actual del índice
     }
 }

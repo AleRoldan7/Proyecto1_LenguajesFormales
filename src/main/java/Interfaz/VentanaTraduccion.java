@@ -14,15 +14,13 @@ import javax.swing.JTextArea;
  * 
  * @author alejandro
  */
-
-
 public class VentanaTraduccion extends JFrame {
     
     private JTextArea textAreaTokens;
     private JTextArea textAreaCodigoOptimizado;
     private JTextArea textAreaErrores; // Área para mostrar los errores
 
-    public VentanaTraduccion(List<Token> tokensEncontrados, String lenguaje, String codigoOptimizado) {
+    public VentanaTraduccion(List<Token> tokensEncontrados, String lenguaje, String codigoFuente) {
         setTitle("Resultados de Análisis - " + lenguaje);
         setSize(800, 600);
         setLocationRelativeTo(null);
@@ -51,6 +49,7 @@ public class VentanaTraduccion extends JFrame {
         mostrarTokens(tokensEncontrados, lenguaje);
 
         // Mostrar el código optimizado
+        String codigoOptimizado = optimizarCodigo(codigoFuente);
         mostrarCodigoOptimizado(codigoOptimizado);
 
         // Añadir los componentes al panel principal
@@ -79,6 +78,34 @@ public class VentanaTraduccion extends JFrame {
     private void mostrarCodigoOptimizado(String codigoOptimizado) {
         // Asegúrate de que los saltos de línea se mantengan
         textAreaCodigoOptimizado.setText(codigoOptimizado);
+    }
+
+    // Método para optimizar el código
+    private String optimizarCodigo(String codigoFuente) {
+        StringBuilder codigoOptimizado = new StringBuilder();
+        String[] lineas = codigoFuente.split("\n");
+
+        for (String linea : lineas) {
+            // Eliminar líneas vacías
+            if (linea.trim().isEmpty()) {
+                continue;
+            }
+
+            // Eliminar comentarios
+            if (linea.trim().startsWith("//")) {
+                continue;
+            }
+
+            // Eliminar líneas que contienen solo saltos de línea
+            if (linea.trim().length() == 0) {
+                continue;
+            }
+
+            // Añadir la línea optimizada
+            codigoOptimizado.append(linea).append("\n");
+        }
+
+        return codigoOptimizado.toString();
     }
 
     // Método para mostrar errores

@@ -2,16 +2,12 @@ Reportes/ReporteErrores.class
 AnalizadorGeneral/AnalizarGeneral.class
 AnalizadorCSS/IdentificadorCSS.class
 AnalizadorJS/IdentificadorJS.class
-Interfaz/JFrameInicio$3.class
 Interfaz/VentanaTraduccion.class
 Interfaz/VentanaAnalisis.class
-Interfaz/JFrameInicio$2.class
-Interfaz/JFrameInicio.class
 Reportes/ResultadoAnalisis.class
 AnalizadorHTML/TraductorEtiquetas.class
 AnalizadorGeneral/GeneradorHTML.class
 Reportes/mostrarErrores.class
-Interfaz/JFrameInicio$1.class
 AnalizadorGeneral/OptimizarCodigo.class
 Reportes/Token.class
 Inicio/Proyecto1AnalizadorLexico.class

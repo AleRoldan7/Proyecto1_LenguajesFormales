@@ -13,6 +13,7 @@ public class IdentificadorHTML {
         "class", "=", "href", "onClick", "id", "style", "type", "placeholder", "required", "name"
     };
     private TraductorEtiquetas traductor = new TraductorEtiquetas();
+    private List<TraductorEtiquetas> etiNormales = new ArrayList<>();
     private List<Token> tokenEncontrado = new ArrayList<>();
 
     public String analizarHTML(String cadena) {
@@ -118,7 +119,7 @@ public class IdentificadorHTML {
         }
     }
 
-    private boolean esHTMLValido(String cadena) {
+    public boolean esHTMLValido(String cadena) {
         Stack<String> stack = new Stack<>();
         int i = 0;
 
@@ -139,11 +140,21 @@ public class IdentificadorHTML {
 
                 if (!etiquetaCompleta.startsWith("/")) { // Es una etiqueta de apertura
                     if (traductor.etiquetasNormales().contains("<" + nombreEtiqueta + ">")) {
-                        stack.push(nombreEtiqueta); // Agregar etiqueta al stack
+                        
+                        
+                        traductor.posiEtiquetas("<" + nombreEtiqueta + ">");
+                        
+                        int tmp = traductor.posiEtiquetas("<" + nombreEtiqueta + ">");
+                        
+                        
+                        stack.push(traductor.etiquetaTraducida().get(tmp)); // Agregar etiqueta al stack
+                        System.out.println("Jalando");
+                        
                     } else {
                         return false; // Etiqueta no válida
                     }
                 } else { // Es una etiqueta de cierre
+                    System.out.println("NO ES ETIQUETA VALIDAAAAAA");
                     String etiquetaDeApertura = etiquetaCompleta.substring(1).trim(); // Extrae el nombre de la etiqueta
                     if (stack.isEmpty() || !stack.peek().equals(etiquetaDeApertura)) {
                         return false; // No hay una etiqueta de apertura correspondiente
@@ -328,9 +339,23 @@ public class IdentificadorHTML {
                         i++; // Saltamos el '>'
                     }
 
-                    // Agregar el token para la etiqueta de apertura
-                    tokens.add(new Token(nombreEtiqueta.toString(), "", "HTML", "Etiqueta", 0, 0));
-
+                   
+                    
+                    
+                     if (traductor.etiquetasNormales().contains("<" + nombreEtiqueta + ">")) {
+                        
+                        
+                        traductor.posiEtiquetas("<" + nombreEtiqueta + ">");
+                        
+                        int tmp = traductor.posiEtiquetas("<" + nombreEtiqueta + ">");
+                        
+                         // Agregar el token para la etiqueta de apertura
+                        tokens.add(new Token(traductor.etiquetaTraducida().get(tmp), "", "HTML", "Etiqueta", 0, 0));
+                       
+                        System.out.println("Jalando");
+                        
+                    }
+                    
                     // Verificar si hay contenido dentro de la etiqueta
                     StringBuilder contenidoEtiqueta = new StringBuilder();
                     while (i < linea.length() && linea.charAt(i) != '<') {
@@ -346,8 +371,13 @@ public class IdentificadorHTML {
             } else {
                 i++; // Avanzar al siguiente carácter
             }
+            
+            
         }
 
+        for (Token token : tokens) {
+            System.out.println("Agregar "+token.getLexema());
+        }
         return tokens;
     }
 
